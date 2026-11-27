@@ -1,0 +1,9 @@
+{
+  "name": "flagsmith-slack-approvals",
+  "version": "0.1.0",
+  "description": "Slack bot: request a flag flip, a teammate approves, self-hosted Flagsmith flips it, every change is audit-logged.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": { "start": "node src/index.js", "test": "node --test" },
+  "dependencies": { "@slack/bolt": "^4.1.0" }
+}
