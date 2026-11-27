@@ -27,6 +27,13 @@ Commands: `/flag on <name>`, `/flag off <name>`, `/flag status <name>`.
 
 Use a demo environment, not production keys.
 
+### Demo requirements and limits
+
+- Use a disposable self-hosted environment with **change requests off**. Flagsmith's update endpoints refuse writes while change requests are enabled.
+- On environments with Feature Versioning v2, Flagsmith rejects the legacy `featurestates` write with HTTP 400. The bot then retries with Flagsmith's experimental `__future__` update-flag endpoint. That fallback is covered by a mock test but has not been run against a live v2 instance. The plain (non-versioned) path is the safest for a demo.
+- The approval step needs **two Slack users**: one requests, a different one approves.
+- Pending requests are kept in memory, so a bot restart drops open approval cards. The audit log file survives restarts.
+
 ## Tests
 
 `npm test` runs the Flagsmith client against a local mock server plus unit tests for parsing and the approval rule.
