@@ -1,0 +1,17 @@
+# Self-hosted Flagsmith (see https://docs.flagsmith.com/deployment/hosting/docker)
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: flagsmith
+    volumes: [pgdata:/var/lib/postgresql/data]
+  flagsmith:
+    image: flagsmith/flagsmith:latest
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/flagsmith
+      DJANGO_ALLOWED_HOSTS: "*"
+    ports: ["8000:8000"]
+    depends_on: [postgres]
+volumes:
+  pgdata:
