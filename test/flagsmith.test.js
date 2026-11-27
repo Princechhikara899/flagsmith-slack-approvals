@@ -12,7 +12,7 @@ function mockFlagsmith() {
     req.on('data', (c) => (body += c));
     req.on('end', () => {
       res.setHeader('content-type', 'application/json');
-      if (req.method === 'GET') return res.end(JSON.stringify({ results: [{ id: state.id, enabled: state.enabled, identity: null, feature_segment: null }] }));
+      if (req.method === 'GET') return res.end(JSON.stringify({ results: [{ id: state.id, feature: 3, enabled: state.enabled, identity: null, feature_segment: null }] }));
       if (req.method === 'PATCH') { state.enabled = JSON.parse(body).enabled; return res.end(JSON.stringify({ id: state.id, enabled: state.enabled })); }
       res.statusCode = 405; res.end('{}');
     });
@@ -46,4 +46,18 @@ test('requester cannot approve own request', () => {
 test('approval card has approve and reject buttons', () => {
   const b = approvalBlocks({ flag: 'f', enabled: true, requester: 'U1', env: 'demo', id: 'abc' });
   assert.deepEqual(b[1].elements.map((e) => e.action_id), ['flag_approve', 'flag_reject']);
+});
+
+test('falls back to the update-flag endpoint when legacy PATCH returns 400', async () => {
+  const calls = [];
+  const fetchImpl = async (url, opts = {}) => {
+    calls.push(`${opts.method || 'GET'} ${url}`);
+    const json = (status, body) => ({ ok: status < 400, status, json: async () => body, text: async () => JSON.stringify(body) });
+    if (!opts.method) return json(200, { results: [{ id: 7, feature: 3, enabled: false }] });
+    if (url.includes('/featurestates/7/')) return json(400, { detail: 'versioning' });
+    return json(200, { environment_default: { enabled: true } });
+  };
+  const fs = new Flagsmith({ baseUrl: 'http://x', apiKey: 'k', environmentKey: 'e', fetchImpl });
+  assert.deepEqual(await fs.setFlag('f', true), { before: false, after: true });
+  assert.equal(calls[2], 'PATCH http://x/api/__future__/environments/e/features/3/');
 });
