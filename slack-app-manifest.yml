@@ -1,0 +1,16 @@
+display_information:
+  name: Flag Approvals
+features:
+  bot_user:
+    display_name: Flag Approvals
+  slash_commands:
+    - command: /flag
+      description: Request a Flagsmith flag change
+      usage_hint: on|off|status <flag_name>
+oauth_config:
+  scopes:
+    bot: [commands, chat:write]
+settings:
+  interactivity:
+    is_enabled: true
+  socket_mode_enabled: true
